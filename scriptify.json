@@ -1,0 +1,19 @@
+{
+    "scripts": [
+        {
+            "name": "Better Loopy for YouTube",
+            "charset": "UTF-8",
+            "run-at-startup": true,
+            "run-when": "ready",
+            "include": [
+                "*://*.youtube.com/watch*v=*",
+                "*://*.youtube.com/user/*"
+            ],
+            "exclude": [],
+            "paths": [
+                "content/Better_Loopy_for_YouTube.user.js"
+            ]
+        }
+    ],
+    "scriptify-version": "0.2.7"
+}

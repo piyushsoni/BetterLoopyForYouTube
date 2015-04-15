@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <Description about="urn:mozilla:install-manifest">
+        <em:type>2</em:type>
+        <em:id>BetterLoopyforYouTube@piyushsoni.com</em:id>
+        <em:name>Better Loopy for YouTube</em:name>
+        <em:version>5.0.3.2</em:version>
+        <em:unpack></em:unpack>
+        <em:bootstrap>true</em:bootstrap>
+        <em:creator>Piyush Soni</em:creator>
+        <em:description>Auto-loop full or a selected part of YouTube videos with great ease.</em:description>
+        <em:contributor>CDM</em:contributor>
+        <em:contributor>PhasmaExMachina</em:contributor>
+        <em:targetApplication>
+            <Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>32.0</em:minVersion>
+                <em:maxVersion>38.*</em:maxVersion>
+            </Description>
+        </em:targetApplication>
+    </Description>
+</RDF>
