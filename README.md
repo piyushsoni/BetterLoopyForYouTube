@@ -17,7 +17,7 @@ If you are like many of us, you'd like to watch/listen to good music videos agai
  - It keeps itself updated, so that you don't have to bother doing that.
  - Optionally loop all videos by default.
  - Works in YouTube's Pop-up and full screen modes as well.
-- Works on User channels
+ - Works on User channels
  - Customizable shortcuts for the most common Better Loopy Features, with some added shortcuts for common YouTube Tasks 
 	 - Alt + L for toggling Loop
 	 - Alt + M for Showing the Settings
