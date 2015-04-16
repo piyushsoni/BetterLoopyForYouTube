@@ -47,13 +47,13 @@ Just open the settings dialog by pressing 'Better Loopy' link at the top of a Yo
 Now, you can just press this newly created button on any page having youtube videos, and it should play them all in the correct order, one by one, automatically in YouTube!
 For example,
 
-If you see some youtube links on a webpage like this:
+If you see some youtube links on a webpage like this:  
 
-How to solve a Rubik's Cube:
-[Youtube Link Part 1](https://www.youtube.com/watch?v=LcJ-y39GzzQ)
-[Youtube Link Part 2](https://www.youtube.com/watch?v=Xfw045MjVDQ)
-[Youtube Link Part 3](https://www.youtube.com/watch?v=6DZUS1YsUvg)
-[Youtube Link Part 4](https://www.youtube.com/watch?v=FzfebdYt_cQ)
+How to solve a Rubik's Cube:  
+[Youtube Link Part 1](https://www.youtube.com/watch?v=LcJ-y39GzzQ)  
+[Youtube Link Part 2](https://www.youtube.com/watch?v=Xfw045MjVDQ)  
+[Youtube Link Part 3](https://www.youtube.com/watch?v=6DZUS1YsUvg)  
+[Youtube Link Part 4](https://www.youtube.com/watch?v=FzfebdYt_cQ)  
 
 Just press this button (you can try it on this page itself after installing the extension and adding the button!) to see them all automatically in the same order.
 If you want to skip any video from the list, just press the "Next>" link. The "next videos to be played" list is just a semi-colon separated list of youtube video IDs and you can add them manually too. For example, in the link http://www.youtube.com/watch?v=LcJ-y39GzzQ, the video id is LcJ-y39GzzQ.
