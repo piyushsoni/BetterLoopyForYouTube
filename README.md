@@ -57,3 +57,7 @@ How to solve a Rubik's Cube:
 
 Just press this button (you can try it on this page itself after installing the extension and adding the button!) to see them all automatically in the same order.
 If you want to skip any video from the list, just press the "Next>" link. The "next videos to be played" list is just a semi-colon separated list of youtube video IDs and you can add them manually too. For example, in the link http://www.youtube.com/watch?v=LcJ-y39GzzQ, the video id is LcJ-y39GzzQ.
+
+
+##How to Install
+For now, the extension is available only through Github.com and only for Firefox - although we hope to make it available for other browsers as well. To install in Firefox, just download the latest version of the add-on file from this link : [Better Loopy for YouTube](https://github.com/piyushsoni/BetterLoopyForYouTube/raw/master/BetterLoopyForYouTube.xpi), and drag and drop the downloaded xpi file on the browser to install.  
