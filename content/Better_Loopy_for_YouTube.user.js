@@ -1,15 +1,14 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name           Better Loopy for YouTube
-// @namespace      PI
+// @namespace      http://piyushsoni.com
 // @description    Auto-loop full or a selected part of YouTube videos with great ease
 // @include        http*://*.youtube.com/watch*v=*
 // @include        http*://*.youtube.com/user/*
-// @version        5.0.3.2
+// @version        5.1.2
 // @credit         CDM, and the supporter(s) of the original script 'Loopy for YouTube'; PhasmaExMachina for his Options Dialog
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_addStyle
-// @grant          GM_log
 // @grant          GM_registerMenuCommand
 // ==/UserScript==
 
@@ -17,9 +16,8 @@
 var isChrome = (navigator.userAgent.toLowerCase().indexOf('chrome') >= 0);
 var isFirefox = (navigator.userAgent.toLowerCase().indexOf('firefox') >= 0);
 var debug = GM_getValue('configDebug', false);
-log = debug ? (isChrome ? function(message){console.log(message);} : (isFirefox ? GM_log : function(){}) ) : function() {}
+var log = debug ? function(message){console.log(message);} : function() {};
 var Config = null; //Script's config object.
-
 
 //Enums
 var STATE_ENDED = 0;
@@ -670,7 +668,7 @@ function AddCSSStyles()
             padding: 2px 4px 2px 4px;        \
             border-radius: 3px;             \
             -moz-border-radius: 3px;    \
-            height:20px                                \
+            height:20px;                  \
             }            \
         #eOnOff {                    \
             font-weight: bold;            \
@@ -1052,11 +1050,11 @@ function main()
                 if(nextVideosEnabled)
                     piExtension.appendChild(blankSpan);
                 var loopStart = document.createTextNode("   Loop : ");
-                var btnLoopStart = create('input', [['type','button'], ['id', 'btnLoopStart'], ['name', 'buttonExtension'], ['value', 'Start Time'], ['class', 'yt-uix-tooltip-reverse yt-uix-button yt-uix-tooltip Thin ExtensionButton'], ['style', 'width:56px;'], ['click', function() {SetCurrentTimeForBox('txtStartTime');}], ['data-tooltip-title','Click to set current time as Loop start time'],['title','Click to set current time as Loop start time']]);
+                var btnLoopStart = create('input', [['type','button'], ['id', 'btnLoopStart'], ['name', 'buttonExtension'], ['value', 'Start Time'], ['class', 'yt-uix-tooltip-reverse yt-uix-button yt-uix-tooltip Thin ExtensionButton'], ['click', function() {SetCurrentTimeForBox('txtStartTime');}], ['data-tooltip-title','Click to set current time as Loop start time'],['title','Click to set current time as Loop start time']]);
                 inputStartTime = create('input', [['id','txtStartTime'],['size','5'],['tabindex','2'],['class','TextBox'],['title','Enter time in mm:ss format or press Enter key to set current video time']]);
                
                 // var loopEnd = document.createTextNode(" End Time: ");
-                var btnLoopEnd = create('input', [['type','button'], ['id', 'btnLoopEnd'], ['name', 'buttonExtension'], ['value', 'End Time'], ['class', 'yt-uix-tooltip-reverse yt-uix-button yt-uix-tooltip Thin ExtensionButton'], ['style', 'width:52px;'], ['click', function() {SetCurrentTimeForBox('txtEndTime'); window.setTimeout(goToStart, 950); }], , ['data-tooltip-title','Click to set current time as Loop end time'],['title','Click to set current time as Loop end time']]);
+                var btnLoopEnd = create('input', [['type','button'], ['id', 'btnLoopEnd'], ['name', 'buttonExtension'], ['value', 'End Time'], ['class', 'yt-uix-tooltip-reverse yt-uix-button yt-uix-tooltip Thin ExtensionButton'], ['click', function() {SetCurrentTimeForBox('txtEndTime'); window.setTimeout(goToStart, 950); }], , ['data-tooltip-title','Click to set current time as Loop end time'],['title','Click to set current time as Loop end time']]);
                
                 inputEndTime = create('input', [['id','txtEndTime'],['size','5'],['tabindex','3'],['class','TextBox'],['title','Enter time in mm:ss format or press Enter key to set current video time']]);
                 inputEndTime.addEventListener('blur', goToStart, false);
@@ -1079,7 +1077,7 @@ function main()
                 inputEndTime.value = customEndTime;           
             }
            
-            watchPanelDiv = $("watch-panel") || $(".watch-panel-section watch-panel-divided-top", document) || $("watch7-content") || $(".watch-content") || $("playnav-video-details");
+            watchPanelDiv = /*$("placeholder-player") || */ $("watch-panel") || $(".watch-panel-section watch-panel-divided-top", document) || $("watch7-content") || $(".watch-content") || $("playnav-video-details");
             log(watchPanelDiv ? ("Found watchPanelDiv: " + watchPanelDiv.id) : ("watchPanelDiv not found to add Loopy bar!"));
             if(!watchPanelDiv && isChannel)
             {
@@ -1109,6 +1107,7 @@ function main()
                    
                     //Add extension to watch panel.
                     watchPanelDiv.insertBefore((extraDiv ? extraDiv : piExtension), insertBeforeElement);
+					// watchPanelDiv.appendChild(extraDiv ? extraDiv : piExtension);
                     log('Inserted Loopy bar');
                     elementsAdded = true;
                     buttonSet.setAttribute('class','Thin ' + buttonSet.getAttribute('class'));
@@ -1783,7 +1782,7 @@ function main()
 
 try
 {
-    main();
+   main();
 }
 catch(ex)
 {
