@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009-2014 Kris Maglione <maglione.k@gmail.com>
+ * Scriptify 0.2.8 
+ *
+ * Copyright © 2009-2015 Kris Maglione <maglione.k@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,7 +31,6 @@ try {
 
     const { classes: Cc, interfaces: Ci, utils: Cu, results: Cr } = Components;
 
-    const { AddonManager } = module("resource://gre/modules/AddonManager.jsm");
     const { XPCOMUtils }   = module("resource://gre/modules/XPCOMUtils.jsm");
 
     const Services = Object.create(module("resource://gre/modules/Services.jsm").Services);
@@ -59,6 +60,17 @@ try {
         prefs: "scriptify-prefs"
     };
 
+    function* iterate(obj) {
+        let seen = new Set;
+        for (; obj; obj = Object.getPrototypeOf(obj)) {
+            for (let key of Object.keys(obj)) {
+                if (!seen.has(key))
+                    yield key;
+                seen.add(key);
+            }
+        }
+    }
+
     function API(sandbox, script) {
         let api = this;
 
@@ -71,7 +83,7 @@ try {
 
         if (!API.ready) {
             API.ready = true;
-            for each (let path in manager.config.api || [])
+            for (let path of manager.config.api || [])
                 try {
                     Services.scriptloader.loadSubScript(
                         manager.getResourceURI(path).spec,
@@ -127,7 +139,7 @@ try {
                 func.call(self);
             else
                 util.listenOnce(this.doc, "DOMContentLoaded",
-                                function () { func.call(self); });
+                                () => { func.call(self); });
         },
 
         /**
@@ -140,7 +152,7 @@ try {
          *      does not exist. @optional
          * @returns {bool|int|string|type(defaultValue)}
          */
-        getValue: function getValue(key, defaultValue) manager.prefs.get(key, defaultValue),
+        getValue: (key, defaultValue) => manager.prefs.get(key, defaultValue),
 
         /**
          * Sets the value of the preference *key* to *val.
@@ -152,11 +164,6 @@ try {
         setValue: function setValue(key, value) {
             manager.prefs.set(key, value);
         },
-		
-		//exportFunc(onPlayerStateChange, unsafeWindow, {defineAs: "onPlayerStateChange"});
-		exportFunc: function exportFunc(func, wind, obj) {
-			Components.utils.exportFunction(func, wind, obj);
-		},
 
         /**
          * Sets the default value of the preference *key* to *val.
@@ -186,7 +193,7 @@ try {
          * @param {[string]} value The value to set.
          * @see .getValue
          */
-        listValues: function listValues() manager.prefs.getNames(),
+        listValues: () => manager.prefs.getNames(),
 
         /**
          * Prematurely ends the loading of the current script.
@@ -270,7 +277,7 @@ try {
                     }));
             });
 
-            for (let [k, v] in Iterator(params.headers || {}))
+            for (let [k, v] of iterate(params.headers || {}))
                 xhr.setRequestHeader(k, v);
 
             // No need to invoke the XML parser as we won't be using the result.
@@ -324,7 +331,7 @@ try {
          *      @default "ISO-8859-1"
          */
         loadScript: function loadScript(path, object, charset) {
-            function principal(win) Services.security.getCodebasePrincipal(win.document.documentURIObject);
+            let principal = win => Services.security.getCodebasePrincipal(win.document.documentURIObject);
 
             if (!object)
                 object = this.sandbox;
@@ -350,7 +357,7 @@ try {
          * @returns {string}
          * @see .getResourceText
          */
-        getResourceURL: function getResourceURL(path) manager.getResourceURI(path).spec,
+        getResourceURL: path => manager.getResourceURI(path).spec,
 
         /**
          * Returns the text of the file inside this extension at *path*.
@@ -365,7 +372,7 @@ try {
         getResourceText: function getResourceText(path, charset) {
             return util.httpGet(manager.getResourceURI(path).spec,
                                 "text/plain;charset=" + (charset || "UTF-8"))
-                        .responseText;
+                       .responseText;
         },
 
         /**
@@ -432,7 +439,9 @@ try {
          *
          * @param {string} branch The sub-branch to return.
          */
-        Branch: function Branch(branch) new this.constructor(this.root + branch),
+        Branch: function Branch(branch) {
+            return new this.constructor(this.root + branch);
+        },
 
         /**
          * Clears the entire branch.
@@ -476,7 +485,9 @@ try {
          *
          * @param {string} name The name of the preference to check.
          */
-        has: function has(name) this.branch.getPrefType(name) !== 0,
+        has: function has(name) {
+            return this.branch.getPrefType(name) !== 0;
+        },
 
         /**
          * Returns an array of all preference names in this branch or the
@@ -485,14 +496,18 @@ try {
          * @param {string} branch The sub-branch for which to return preferences.
          * @optional
          */
-        getNames: function getNames(branch) this.branch.getChildList(branch || "", { value: 0 }),
+        getNames: function getNames(branch) {
+            return this.branch.getChildList(branch || "", { value: 0 });
+        },
 
         /**
          * Returns true if the given preference is set to its default value.
          *
          * @param {string} name The name of the preference to check.
          */
-        isDefault: function isDefault(name) !this.branch.prefHasUserValue(name),
+        isDefault: function isDefault(name) {
+            return !this.branch.prefHasUserValue(name);
+        },
 
         /**
          * Sets the preference *name* to *value*. If the preference already
@@ -538,7 +553,9 @@ try {
         this.defaults = !!defaults;
     }
     PrefsProxy.prototype = {
-        Branch: function Branch(branch) new this.constructor(this.root + branch),
+        Branch: function Branch(branch) {
+            return new this.constructor(this.root + branch);
+        },
 
         isProxy: true,
 
@@ -565,7 +582,7 @@ try {
             let windows = Services.wm.getXULWindowEnumerator(null);
             while (windows.hasMoreElements()) {
                 let window = windows.getNext().QueryInterface(Ci.nsIXULWindow);
-                for each (let type in ["typeContent"]) {
+                for (let type of ["typeContent"]) {
                     let docShells = window.docShell.getDocShellEnumerator(Ci.nsIDocShellTreeItem[type],
                                                                           Ci.nsIDocShell.ENUMERATE_FORWARDS);
                     while (docShells.hasMoreElements()) {
@@ -633,12 +650,12 @@ try {
          * Creates a new nsIURI object from the given URL spec, charset,
          * and base nsIURI. The second two parameters are optional.
          */
-        newURI: wrap(function newURI(url, charset, base) Services.io.newURI(url, charset, base), true),
+        newURI: wrap((url, charset, base) => Services.io.newURI(url, charset, base), true),
 
         /**
          * Returns the top-level chrome window for a given window.
          */
-        topWindow: function topWindow(win)
+        topWindow: win =>
                 win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIWebNavigation)
                    .QueryInterface(Ci.nsIDocShellTreeItem).rootTreeItem
                    .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow),
@@ -653,21 +670,23 @@ try {
          */
         URIMatcher: function URIMatcher(pattern) {
             if (pattern == "*" || pattern == "<all_urls>")
-                return function () true;
+                return () => true;
 
-            if (/^\/(.*?)(?:\/([i]*))?$/.test(pattern))
-                return let (re = RegExp(RegExp.$1, RegExp.$2))
-                    function (uri) re.test(uri.spec);
+            let match;
+            if ((match = /^\/(.*?)(?:\/([i]*))?$/.exec(pattern))) {
+                let re = RegExp(match[1], match[2]);
+                return uri => re.test(uri.spec);
+            }
 
             let patternURI = util.newURI(pattern.replace(/^\*:/, "http:")).QueryInterface(Ci.nsIURL);
             let anyScheme = pattern.slice(0, 2) == "*:";
 
             if (patternURI.scheme == "about")
-                return function (uri) uri.equals(patternURI);
+                return uri => uri.equals(patternURI);
 
-            let host = function host(uri) uri.host;
+            let host = uri => uri.host;
             if (/\.tld$/.test(patternURI.host))
-                host = function host(uri)
+                host = uri =>
                     /\./.test(uri.host) ? uri.host.slice(0, -Services.tld.getPublicSuffix(uri).length)
                                         : uri.host;
 
@@ -700,7 +719,7 @@ try {
         this.config = JSON.parse(util.httpGet(this.getResourceURI("scriptify.json").spec));
 
         if (!isContentScript)
-            for (let [k, v] in Iterator(this.config.preferences || {}))
+            for (let [k, v] of iterate(this.config.preferences || {}))
                 this.prefs.defaults.set(k, v);
     }
     Manager.prototype = {
@@ -721,10 +740,10 @@ try {
     function ScriptManager() {
         Manager.call(this);
 
-        for each (let script in this.config.scripts)
+        for (let script of this.config.scripts)
             script.matchers = {
-                include: (script.include || []).map(function (pat) util.URIMatcher(pat)),
-                exclude: (script.exclude || []).map(function (pat) util.URIMatcher(pat)),
+                include: (script.include || []).map(pat => util.URIMatcher(pat)),
+                exclude: (script.exclude || []).map(pat => util.URIMatcher(pat)),
             };
 
         for (let window in util.contentWindows)
@@ -741,14 +760,14 @@ try {
 
             let uri = util.newURI(window.location.href);
 
-            for each (let script in this.config.scripts) {
+            for (let script of this.config.scripts) {
                 if (startup && !script["run-at-startup"])
                     continue;
                 if (!~["file", "http", "https"].indexOf(uri.scheme) && uri.spec != "about:home")
                     continue;
-                if (script.matchers.exclude.some(function (test) test(uri)))
+                if (script.matchers.exclude.some(test => test(uri)))
                     continue;
-                if (script.matchers.include.some(function (test) test(uri)))
+                if (script.matchers.include.some(test => test(uri)))
                     this.makeSandbox(window, script);
             }
         }),
@@ -766,10 +785,10 @@ try {
 
                 let doc = window.document;
                 if (!~states.indexOf(doc.readyState)) {
-                    let again = function () { manager.makeSandbox(window, script); }
+                    let again = () => { manager.makeSandbox(window, script); };
                     let event = this.events[states[0]];
                     if (delay)
-                        util.listenOnce(window[target], event, function () { util.delay(again) });
+                        util.listenOnce(window[target], event, () => { util.delay(again) });
                     else
                         util.listenOnce(window[target], event, again);
                     return;
@@ -788,14 +807,18 @@ try {
             win[addon.id][script.name] = true;
 
 
-            let sandbox = Cu.Sandbox(window, { sandboxPrototype: window });
+            let sandbox = Cu.Sandbox(window, {
+                sameZoneAs: window,
+                sandboxPrototype: window,
+                wantExportHelpers: true,
+            });
             sandbox.unsafeWindow = window.wrappedJSObject;
 
             let api = new API(sandbox, script);
 
             Services.obs.notifyObservers(sandbox, "scriptify:sandbox-created", addon.id);
 
-            for each (let path in script.paths)
+            for (let path of script.paths)
                 try {
                     Services.scriptloader.loadSubScript(
                         this.getResourceURI(path).spec,
@@ -943,7 +966,7 @@ try {
         this.startup = function startup(data, reason) {
             addon = data;
 
-            for (let [k, v] in Iterator(messages))
+            for (let [k, v] of iterate(messages))
                 messages[k] = data.id + ":" + v;
 
             // getAddonById at startup is obscenely expensive.
@@ -953,10 +976,10 @@ try {
 
             // The Message manager on Gecko <8.0 won't accept message listeners
             // from sandbox compartments.
-            if (!prefs.get("browser.tabs.remote"))
-                manager = new GlobalManager;
-            else
+            if ("browserTabsRemoteAutostart" in Services.appinfo && Services.appinfo.browserTabsRemoteAutostart)
                 manager = new SlaveDriver;
+            else
+                manager = new GlobalManager;
         }
 
         this.shutdown = function shutdown(data, reason) {
@@ -969,7 +992,7 @@ try {
                 manager.uninstall();
         }
 
-        this.install = function install(data, reason) {}
+        this.install = function install(data, reason) {};
 
         this.util = util;
     }
@@ -982,15 +1005,17 @@ try {
         dump((addon ? addon.id : "scriptify") + ": " + Array.join(arguments, ", ") + "\n");
     }
 
-    function module(uri) Cu.import(uri, {});
+    function module(uri) {
+        return Cu.import(uri, {});
+    }
 
     function reportError(e) {
         Cu.reportError(e);
         Services.console.logStringMessage((e.stack || Error().stack).replace(/@(\S+ -> )+/g, "@"));
     }
 
-    function wrap(fn, throws)
-        function wrapper() {
+    function wrap(fn, throws) {
+        return function wrapper() {
             try {
                 return fn.apply(this, arguments);
             }
@@ -1000,6 +1025,7 @@ try {
                     throw e;
             }
         }
+    }
 
 }).call(typeof sendSyncMessage == "undefined" ? this : {}, this);
 

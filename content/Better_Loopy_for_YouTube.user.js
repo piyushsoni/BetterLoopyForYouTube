@@ -4,14 +4,14 @@
 // @description    Auto-loop full or a selected part of YouTube videos with great ease
 // @include        http*://*.youtube.com/watch*v=*
 // @include        http*://*.youtube.com/user/*
-// @version        5.1.2
+// @include        http*://*.youtube.com/
+// @version        5.1.6
 // @credit         CDM, and the supporter(s) of the original script 'Loopy for YouTube'; PhasmaExMachina for his Options Dialog
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_addStyle
 // @grant          GM_registerMenuCommand
 // ==/UserScript==
-
 
 var isChrome = (navigator.userAgent.toLowerCase().indexOf('chrome') >= 0);
 var isFirefox = (navigator.userAgent.toLowerCase().indexOf('firefox') >= 0);
@@ -584,7 +584,7 @@ function CreateConfig()
             }
         },   
         "About":{
-            html:'<p><a href="https://addons.mozilla.org/en-US/firefox/addon/betterloopyforyoutube/"><span style="font:15px !important;font-weight:bold;color:gray">Better Loopy for YouTube</span></a> by <a href="https://addons.mozilla.org/en-US/firefox/user/irrationalapps/">Piyush Soni</a><br/><br/>Like the Script? <br/><a href="https://addons.mozilla.org/en-us/firefox/addon/betterloopyforyoutube/reviews/add">Leave a review</a> for us! <br/>',
+            html:'<p><a href="https://addons.mozilla.org/en-US/firefox/addon/betterloopyforyoutube/"><span style="font:15px !important;font-weight:bold;color:gray">Better Loopy for YouTube</span></a> by <a href="https://addons.mozilla.org/en-US/firefox/user/irrationalapps/">Piyush Soni</a><br/><br/>Like the Add-on? <br/><a href="https://addons.mozilla.org/en-us/firefox/addon/betterloopyforyoutube/reviews/add">Leave a review</a> for us! <br/>',
         }
     };
 }
@@ -1181,14 +1181,15 @@ function main()
                 }
                
                 if(!isHTML5)
-                    ytObj = ytPlayer.wrappedJSObject || ytPlayer;
+                    ytObj = (ytPlayer ? ytPlayer.wrappedJSObject : null ) || ytPlayer;
                    
                 if(ytObj)
                 {
                     ytObj.addEventListener("onStateChange", 'onPlayerStateChange');
                     eventRegistered = true;
+					log('registered on retry number ' + eventRegistrationRetries);
                 }
-                log('registered on retry number ' + eventRegistrationRetries);
+                
             }
            
             //Play All Videos/Loop by default.
@@ -1308,7 +1309,9 @@ function main()
 
     function onPlayerStateChange(newState)
     {
-        log('Player state changed to ' + newState + ', ytLoop is ' + ytLoop);
+		if(ytLoop)
+			log('Player state changed to ' + newState + ', ytLoop is ' + ytLoop);
+		
         if(newState == '5' || newState == '-1' || newState == '1')
         {
             if((extensionEnabled && !$('newLoopyDiv')) || (!extensionEnabled && !$('loopSet')))
@@ -1323,10 +1326,9 @@ function main()
             }
             else
                 log('Loopy bar still found');
-
         }
        
-        if (ytLoop && newState == STATE_ENDED)
+        if (ytLoop && ytObj && newState == STATE_ENDED)
         {
             //If any video IDs are there in the next Videos list, try to play them first.
             if(!playNext())
@@ -1345,8 +1347,8 @@ function main()
                 }
                
                 //Just to be safe.
-                window.setTimeout(function() { if(ytObj.getPlayerState() != STATE_PLAY) {ytObj.pauseVideo(); ytObj.playVideo(); }}, 100);
-                window.setTimeout(function() { if(ytObj.getPlayerState() != STATE_PLAY) {ytObj.pauseVideo(); ytObj.playVideo(); }}, 200);
+				window.setTimeout(function() { try{if(ytObj && ytObj.getPlayerState() != STATE_PLAY) {ytObj.pauseVideo(); ytObj.playVideo(); }} catch(ex){log('caught exception');}}, 100);
+				window.setTimeout(function() { try{if(ytObj && ytObj.getPlayerState() != STATE_PLAY) {ytObj.pauseVideo(); ytObj.playVideo(); }} catch(ex){log('caught exception');}}, 200);
                
                 if(isChrome) //Why Chrome, why?
                     setTimeout(function() { goToStart(); }, RECHECK_PERIOD);
